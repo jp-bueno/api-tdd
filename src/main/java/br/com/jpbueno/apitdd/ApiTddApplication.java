@@ -1,5 +1,6 @@
 package br.com.jpbueno.apitdd;
 
+import br.com.jpbueno.apitdd.domain.User;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
