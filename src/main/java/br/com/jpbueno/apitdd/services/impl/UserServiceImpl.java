@@ -4,6 +4,7 @@ import br.com.jpbueno.apitdd.domain.User;
 import br.com.jpbueno.apitdd.domain.dto.UserDTO;
 import br.com.jpbueno.apitdd.repositories.UserRepository;
 import br.com.jpbueno.apitdd.services.UserService;
+import br.com.jpbueno.apitdd.services.exceptions.DataIntregityViolationException;
 import br.com.jpbueno.apitdd.services.exceptions.ObjectNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,26 @@ public class UserServiceImpl implements UserService {
     }
 
     public User create(UserDTO userDTO) {
-
+        findByEmail(userDTO);
         return userRepository.save(mapper.map(userDTO, User.class));
+    }
+
+    @Override
+    public User update(UserDTO userDTO) {
+        findByEmail(userDTO);
+        return userRepository.save(mapper.map(userDTO, User.class));
+    }
+
+    @Override
+    public void delete(Integer id) {
+        findById(id);
+        userRepository.deleteById(id);
+    }
+
+    private void findByEmail(UserDTO obj) {
+        Optional<User> user = userRepository.findByEmail(obj.getEmail());
+        if(user.isPresent() && !user.get().getId().equals(obj.getId())) {
+            throw new DataIntregityViolationException("Email já cadastrado no sistema");
+        }
     }
 }
