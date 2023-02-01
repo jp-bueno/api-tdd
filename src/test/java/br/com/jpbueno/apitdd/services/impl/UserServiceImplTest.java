@@ -3,6 +3,7 @@ package br.com.jpbueno.apitdd.services.impl;
 import br.com.jpbueno.apitdd.domain.User;
 import br.com.jpbueno.apitdd.domain.dto.UserDTO;
 import br.com.jpbueno.apitdd.repositories.UserRepository;
+import br.com.jpbueno.apitdd.services.exceptions.DataIntregityViolationException;
 import br.com.jpbueno.apitdd.services.exceptions.ObjectNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -100,6 +101,18 @@ class UserServiceImplTest {
         assertEquals(PASSWORD, response.getPassword());
     }
 
+    @Test
+    void whenCreateThenReturnAnDataIntegrityViolationException() {
+        Mockito.when(repository.findByEmail(Mockito.anyString())).thenReturn(optionalUser);
+
+        try {
+            optionalUser.get().setId(2);
+            service.create(userDTO);
+        } catch (Exception exception) {
+            assertEquals(DataIntregityViolationException.class, exception.getClass());
+            assertEquals("Email já cadastrado no sistema", exception.getMessage());
+        }
+    }
     @Test
     void update() {
     }
