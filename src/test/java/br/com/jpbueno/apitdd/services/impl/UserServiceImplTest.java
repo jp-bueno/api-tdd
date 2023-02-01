@@ -3,6 +3,7 @@ package br.com.jpbueno.apitdd.services.impl;
 import br.com.jpbueno.apitdd.domain.User;
 import br.com.jpbueno.apitdd.domain.dto.UserDTO;
 import br.com.jpbueno.apitdd.repositories.UserRepository;
+import br.com.jpbueno.apitdd.services.exceptions.ObjectNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,6 +52,22 @@ class UserServiceImplTest {
         assertEquals(ID, response.getId());
         assertEquals(NAME, response.getNome());
         assertEquals(EMAIL, response.getEmail());
+    }
+
+    @Test
+    void whenFindByIdThenReturnAnObjectNotFoundException() {
+        /*Quando chamar um método findById irá estourar uma exceção de OBJETO NÃO ENCONTRADO*/
+        Mockito.when(repository.findById(Mockito.anyInt())).thenThrow(new ObjectNotFoundException("Objeto não encontrado"));
+
+        /*Irá testar se encontra algo pelo ID,
+        * se sim, pegara a exceção e assegurar que a classe é igual a ObjectNotFoundException*/
+        try {
+            service.findById(ID);
+        } catch (Exception ex) {
+            assertEquals(ObjectNotFoundException.class, ex.getClass());
+            assertEquals("Objeto não encontrado", ex.getMessage());
+        }
+
     }
 
     @Test
