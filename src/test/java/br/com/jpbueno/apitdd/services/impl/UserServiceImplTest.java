@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 @SpringBootTest
 class UserServiceImplTest {
     public static final Integer ID      = 1;
@@ -45,7 +47,7 @@ class UserServiceImplTest {
 
     @Test
     void whenFindByIdThenReturnAnUserInstance() {
-        Mockito.when(repository.findById(Mockito.anyInt())).thenReturn(optionalUser);
+        when(repository.findById(Mockito.anyInt())).thenReturn(optionalUser);
 
         User response = service.findById(ID);
 
@@ -59,7 +61,7 @@ class UserServiceImplTest {
     @Test
     void whenFindByIdThenReturnAnObjectNotFoundException() {
         /*Quando chamar um método findById irá estourar uma exceção de OBJETO NÃO ENCONTRADO*/
-        Mockito.when(repository.findById(Mockito.anyInt())).thenThrow(new ObjectNotFoundException("Objeto não encontrado"));
+        when(repository.findById(Mockito.anyInt())).thenThrow(new ObjectNotFoundException("Objeto não encontrado"));
 
         /*Irá testar se encontra algo pelo ID,
         * se sim, pegara a exceção e assegurar que a classe é igual a ObjectNotFoundException*/
@@ -74,7 +76,7 @@ class UserServiceImplTest {
 
     @Test
     void whenFindAllThenReturnAnListOfUser() {
-        Mockito.when(repository.findAll()).thenReturn(List.of(user));
+        when(repository.findAll()).thenReturn(List.of(user));
 
         List<User> response = service.findAll();
 
@@ -89,7 +91,7 @@ class UserServiceImplTest {
 
     @Test
     void whenCreateThenReturnSucess() {
-        Mockito.when(repository.save(Mockito.any())).thenReturn(user);
+        when(repository.save(Mockito.any())).thenReturn(user);
 
         User response = service.create(userDTO);
 
@@ -103,7 +105,7 @@ class UserServiceImplTest {
 
     @Test
     void whenCreateThenReturnAnDataIntegrityViolationException() {
-        Mockito.when(repository.findByEmail(Mockito.anyString())).thenReturn(optionalUser);
+        when(repository.findByEmail(Mockito.anyString())).thenReturn(optionalUser);
 
         try {
             optionalUser.get().setId(2);
@@ -115,7 +117,7 @@ class UserServiceImplTest {
     }
     @Test
     void whenUpdateThenReturnSucess() {
-        Mockito.when(repository.save(Mockito.any())).thenReturn(user);
+        when(repository.save(Mockito.any())).thenReturn(user);
 
         User response = service.update(userDTO);
 
@@ -129,7 +131,7 @@ class UserServiceImplTest {
 
     @Test
     void whenUpdateThenReturnAnDataIntegrityViolationException() {
-        Mockito.when(repository.findByEmail(Mockito.anyString())).thenReturn(optionalUser);
+        when(repository.findByEmail(Mockito.anyString())).thenReturn(optionalUser);
 
         try {
             optionalUser.get().setId(2);
@@ -141,7 +143,24 @@ class UserServiceImplTest {
     }
 
     @Test
-    void delete() {
+    void deleteWithSucess() {
+        when(repository.findById(Mockito.anyInt())).thenReturn(optionalUser);
+        doNothing().when(repository).deleteById(Mockito.anyInt());
+
+        service.delete(ID);
+
+        verify(repository, times(1)).deleteById(Mockito.anyInt());
+    }
+
+    @Test
+    void deleteWithObjectNotFoundException() {
+        when(repository.findById(Mockito.anyInt())).thenThrow(new ObjectNotFoundException("Objeto não encontrado"));
+        try {
+            service.delete(ID);
+        } catch (Exception ex) {
+            assertEquals(ObjectNotFoundException.class, ex.getClass());
+            assertEquals("Objeto não encontrado", ex.getMessage());
+        }
     }
 
     private void startUser() {
